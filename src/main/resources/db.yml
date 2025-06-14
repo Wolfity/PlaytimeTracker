@@ -1,0 +1,12 @@
+# type of database
+# Supported: MYSQL & SQLite
+database-type: SQLite
+
+# How often want to save everyone's playtime to the database automatically
+save-play-time-interval-seconds: 600
+
+# Ignored if database-type is NOT set to MYSQL
+mysql:
+  jdbc-url: ""
+  username: ""
+  password: ""

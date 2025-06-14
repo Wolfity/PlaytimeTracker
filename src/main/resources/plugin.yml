@@ -1,0 +1,4 @@
+name: PlaytimeTracker
+version: '1.0'
+main: me.wolfity.playtime.PlaytimeTracker
+api-version: '1.21'
