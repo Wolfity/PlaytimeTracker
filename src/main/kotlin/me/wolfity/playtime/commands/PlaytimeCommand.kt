@@ -1,22 +1,49 @@
 package me.wolfity.playtime.commands
 
-import me.wolfity.developmentutil.ext.uuid
 import me.wolfity.developmentutil.util.TimeFormatConfig
 import me.wolfity.developmentutil.util.TimeUnitFormat
 import me.wolfity.developmentutil.util.formatTime
 import me.wolfity.developmentutil.util.launchAsync
 import me.wolfity.developmentutil.util.sendStyled
-import me.wolfity.playtime.db.PlayTime
+import me.wolfity.developmentutil.util.style
 import me.wolfity.playtime.plugin
+import net.kyori.adventure.text.JoinConfiguration
 import org.bukkit.entity.Player
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.transactions.transaction
 import revxrsal.commands.annotation.Command
 import revxrsal.commands.annotation.Named
 import revxrsal.commands.annotation.Optional
 import revxrsal.commands.bukkit.annotation.CommandPermission
 
 class PlaytimeCommand {
+
+    @Command("playtime leaderboard", "pt leaderboard", "ptlb", "pt lb", "playtimelb")
+    @CommandPermission("playtime.view")
+    fun onLeaderboard(sender: Player) {
+        launchAsync {
+            val topPlayers = plugin.playtimeManager.loadTopPlaytime(10)
+            if (topPlayers.isEmpty()) {
+                sender.sendStyled("<red>No playtime data found.")
+                return@launchAsync
+            }
+
+            val header = plugin.config.getString("playtime-leaderboard-header")!!
+            val footer = plugin.config.getString("playtime-leaderboard-footer")!!
+            val entryFormat = plugin.config.getString("playtime-leaderboard-entry")!!
+
+            sender.sendStyled(header)
+            val body = topPlayers.mapIndexed { index, (uuid, playtimeSeconds) ->
+                val name = plugin.playerManager.getDataByUUID(uuid)?.name ?: "Unknown"
+                val formattedTime = formatPlaytime(playtimeSeconds)
+                entryFormat
+                    .replace("{position}", (index + 1).toString())
+                    .replace("{player}", name)
+                    .replace("{playtime}", formattedTime)
+            }
+            sender.sendStyled(style(body, JoinConfiguration.newlines()))
+            sender.sendStyled(footer)
+        }
+    }
+
 
     @Command("playtime", "pt")
     @CommandPermission("playtime.view")

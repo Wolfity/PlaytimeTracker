@@ -3,6 +3,7 @@ package me.wolfity.playtime
 import me.wolfity.developmentutil.ext.registerListener
 import me.wolfity.developmentutil.ext.uuid
 import me.wolfity.developmentutil.files.CustomConfig
+import me.wolfity.developmentutil.misc.UpdateChecker
 import me.wolfity.developmentutil.util.launchAsync
 import me.wolfity.developmentutil.util.toSeconds
 import me.wolfity.playtime.commands.PlaytimeCommand
@@ -26,13 +27,14 @@ class PlaytimeTracker : JavaPlugin() {
     lateinit var dbConfig: CustomConfig
 
     companion object {
-        // TODO in 1.1.0
-//        const val RESOURCE_ID: Int = -1
+        const val RESOURCE_ID: Int = 126039
     }
 
     private lateinit var lamp: Lamp<BukkitCommandActor>
     private lateinit var _playtimeManager: PlaytimeManager
     private lateinit var _playerManager: PlayerManager
+
+    private lateinit var updateChecker: UpdateChecker
 
     val playtimeManager: PlaytimeManager
         get() = _playtimeManager
@@ -43,6 +45,10 @@ class PlaytimeTracker : JavaPlugin() {
     override fun onEnable() {
         plugin = this
         loadFiles()
+
+        this.updateChecker = UpdateChecker(this, plugin.description.version, RESOURCE_ID)
+
+        updateCheck()
 
         DatabaseManager.init()
         this._playtimeManager = PlaytimeManager()
@@ -76,6 +82,7 @@ class PlaytimeTracker : JavaPlugin() {
 
     private fun registerListeners() {
         PlayerListeners().registerListener(this)
+        updateChecker.registerListener(this)
     }
 
     private fun setupLamp() {
@@ -92,13 +99,13 @@ class PlaytimeTracker : JavaPlugin() {
         dbConfig = CustomConfig(this, "db.yml")
     }
 
-//    private fun updateCheck() {
-//        UpdateChecker.getVersion { version ->
-//            if (this.description.version == version) {
-//                logger.info("There is not a new update available.");
-//            } else {
-//                logger.info("There is a new update available for Simple Chat Moderation");
-//            }
-//        }
-//    }
+    private fun updateCheck() {
+        updateChecker.getVersion(plugin, RESOURCE_ID) { version ->
+            if (this.description.version == version) {
+                logger.info("There is not a new update available.");
+            } else {
+                logger.info("There is a new update available for Simple Chat Moderation");
+            }
+        }
+    }
 }

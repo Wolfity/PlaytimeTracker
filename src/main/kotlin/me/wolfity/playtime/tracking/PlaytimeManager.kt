@@ -1,6 +1,8 @@
 package me.wolfity.playtime.tracking
 
+import me.wolfity.developmentutil.ext.uuid
 import me.wolfity.playtime.db.PlayTime
+import org.bukkit.Bukkit
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.util.UUID
@@ -35,7 +37,6 @@ class PlaytimeManager {
         return storedTime + sessionTime
     }
 
-
     suspend fun updatePlaytimeForPlayer(uuid: UUID) {
         val session = activeSessions[uuid] ?: return
         val now = System.currentTimeMillis()
@@ -52,6 +53,27 @@ class PlaytimeManager {
             session.accumulatedSessionSeconds = 0L
         }
     }
+
+    suspend fun loadTopPlaytime(limit: Int): List<Pair<UUID, Long>> = newSuspendedTransaction {
+        val now = System.currentTimeMillis()
+
+        val topStored = PlayTime.selectAll()
+            .orderBy(PlayTime.totalPlaytimeSeconds, SortOrder.DESC)
+            .limit(limit)
+            .map { it[PlayTime.uuid] to it[PlayTime.totalPlaytimeSeconds] }
+
+        topStored.map { (uuid, storedTime) ->
+            val session = activeSessions[uuid]
+            val sessionTime = if (session != null) {
+                val elapsedSeconds = (now - session.sessionStartMillis) / 1000
+                session.accumulatedSessionSeconds + (if (elapsedSeconds > 0) elapsedSeconds else 0)
+            } else {
+                0L
+            }
+            uuid to (storedTime + sessionTime)
+        }
+    }
+
 
 
     private suspend fun loadTotalPlaytime(uuid: UUID): Long? = newSuspendedTransaction {
