@@ -6,6 +6,8 @@ import me.wolfity.developmentutil.files.CustomConfig
 import me.wolfity.developmentutil.misc.UpdateChecker
 import me.wolfity.developmentutil.util.launchAsync
 import me.wolfity.developmentutil.util.toSeconds
+import me.wolfity.playtime.afk.AFKDetector
+import me.wolfity.playtime.afk.AfkCommand
 import me.wolfity.playtime.commands.PlaytimeCommand
 import me.wolfity.playtime.player.PlayerManager
 import me.wolfity.playtime.commands.UserCommandParameter
@@ -33,8 +35,12 @@ class PlaytimeTracker : JavaPlugin() {
     private lateinit var lamp: Lamp<BukkitCommandActor>
     private lateinit var _playtimeManager: PlaytimeManager
     private lateinit var _playerManager: PlayerManager
+    private lateinit var _afkDetector: AFKDetector
 
     private lateinit var updateChecker: UpdateChecker
+
+    val afkDetector: AFKDetector
+        get() = _afkDetector
 
     val playtimeManager: PlaytimeManager
         get() = _playtimeManager
@@ -52,6 +58,7 @@ class PlaytimeTracker : JavaPlugin() {
 
         DatabaseManager.init()
         this._playtimeManager = PlaytimeManager()
+        this._afkDetector = AFKDetector(plugin.config.getLong("afk-mark-minutes") * 60 * 1000).also { it.registerListener(this) }
         this._playerManager = PlayerManager()
 
         setupLamp()
@@ -78,6 +85,7 @@ class PlaytimeTracker : JavaPlugin() {
 
     private fun registerCommands() {
         lamp.register(PlaytimeCommand())
+        lamp.register(AfkCommand())
     }
 
     private fun registerListeners() {

@@ -2,3 +2,7 @@ playtime-message: "<yellow>{player}'s playtime is <gold>{playtime}"
 playtime-leaderboard-header: "<yellow><bold>Playtime Leaderboards"
 playtime-leaderboard-entry: "<gold>#{position}. <yellow>{player} - {playtime}"
 playtime-leaderboard-footer: ""
+
+# This is the amount of minutes of inactivity
+# A player needs to show to be considered afk
+afk-mark-minutes: 1
