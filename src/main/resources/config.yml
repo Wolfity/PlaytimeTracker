@@ -3,6 +3,22 @@ playtime-leaderboard-header: "<yellow><bold>Playtime Leaderboards"
 playtime-leaderboard-entry: "<gold>#{position}. <yellow>{player} - {playtime}"
 playtime-leaderboard-footer: ""
 
+login-streak-leaderboard-header: "<yellow><bold>Login Streak Leaderboard"
+login-streak-leaderboard-entry: "<gold>#{position}. <yellow>{player} - {currentLoginStreak}"
+login-streak-leaderboard-footer: ""
+
+max-login-streak-leaderboard-header: "<yellow><bold>Max Streak Leaderboard"
+max-login-streak-leaderboard-entry: "<gold>#{position}. <yellow>{player} - {maxLoginStreak}"
+max-login-streak-leaderboard-footer: ""
+
+
+login-streak-info-header: "<gold>Login Streak {player}"
+login-streak-body:
+  - "<yellow>Current Streak: <gold>{currentStreak}"
+  - "<yellow>Max Streak: <gold>{maxStreak}"
+
+
+
 # This is the amount of minutes of inactivity
 # A player needs to show to be considered afk
 afk-mark-minutes: 1

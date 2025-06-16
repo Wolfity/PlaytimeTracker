@@ -8,6 +8,9 @@ import me.wolfity.developmentutil.util.launchAsync
 import me.wolfity.developmentutil.util.toSeconds
 import me.wolfity.playtime.afk.AFKDetector
 import me.wolfity.playtime.afk.AfkCommand
+import me.wolfity.playtime.commands.LeaderboardCommands
+import me.wolfity.playtime.commands.LeaderboardType
+import me.wolfity.playtime.commands.LoginStreakCommand
 import me.wolfity.playtime.commands.PlaytimeCommand
 import me.wolfity.playtime.player.PlayerManager
 import me.wolfity.playtime.commands.UserCommandParameter
@@ -86,6 +89,8 @@ class PlaytimeTracker : JavaPlugin() {
     private fun registerCommands() {
         lamp.register(PlaytimeCommand())
         lamp.register(AfkCommand())
+        lamp.register(LoginStreakCommand())
+        lamp.register(LeaderboardCommands())
     }
 
     private fun registerListeners() {
@@ -97,6 +102,11 @@ class PlaytimeTracker : JavaPlugin() {
         this.lamp = BukkitLamp.builder(this)
             .parameterTypes {
                 it.addParameterType(UserCommandParameter::class.java, UserParameterType())
+            }
+            .suggestionProviders { providers ->
+                providers.addProvider(LeaderboardType::class.java) {
+                    LeaderboardType.entries.map { it.name }
+                }
             }
             .build()
     }

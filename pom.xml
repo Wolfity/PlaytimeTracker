@@ -6,7 +6,7 @@
 
     <groupId>me.wolfity.playtime</groupId>
     <artifactId>PlaytimeTracker</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
     <packaging>jar</packaging>
 
     <name>PlaytimeTracker</name>
@@ -145,10 +145,17 @@
             <artifactId>lamp.bukkit</artifactId>
             <version>4.0.0-beta.19</version>
         </dependency>
+
         <dependency>
             <groupId>io.github.revxrsal</groupId>
             <artifactId>lamp.brigadier</artifactId>
             <version>4.0.0-beta.19</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jetbrains.exposed</groupId>
+            <artifactId>exposed-kotlin-datetime</artifactId>
+            <version>0.50.1</version>
         </dependency>
 
     </dependencies>
