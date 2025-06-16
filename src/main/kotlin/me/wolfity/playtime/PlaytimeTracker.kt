@@ -122,7 +122,7 @@ class PlaytimeTracker : JavaPlugin() {
             if (this.description.version == version) {
                 logger.info("There is not a new update available.");
             } else {
-                logger.info("There is a new update available for Simple Chat Moderation");
+                logger.info("There is a new update available for ${plugin.description.name}");
             }
         }
     }
