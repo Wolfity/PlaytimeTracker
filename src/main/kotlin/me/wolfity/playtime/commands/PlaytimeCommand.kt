@@ -17,6 +17,19 @@ import revxrsal.commands.bukkit.annotation.CommandPermission
 
 class PlaytimeCommand {
 
+    @Command("ptreset", "playtimereset")
+    @CommandPermission("playtime.admin")
+    fun onPlaytimeReset(sender: Player, @Named("player") target: UserCommandParameter) {
+        launchAsync {
+            val targetUser = plugin.playerManager.getDataByName(target.name)
+            if (targetUser == null) {
+                sender.sendStyled("<red>This player does not exist")
+                return@launchAsync
+            }
+            plugin.playtimeManager.resetPlaytime(targetUser.uuid)
+            sender.sendStyled("<green>Successfully reset the playtime of ${targetUser.name}")
+        }
+    }
 
     @Command("playtime", "pt")
     @CommandPermission("playtime.view")

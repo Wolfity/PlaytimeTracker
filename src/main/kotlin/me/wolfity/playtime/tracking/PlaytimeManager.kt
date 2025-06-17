@@ -22,6 +22,21 @@ class PlaytimeManager() {
         updateJoinStreak(uuid)
     }
 
+    suspend fun resetPlaytime(uuid: UUID) = newSuspendedTransaction {
+        PlayTime.update({ PlayTime.uuid eq uuid }) {
+            it[totalPlaytimeSeconds] = 0L
+            it[lastUpdate] = System.currentTimeMillis() / 1000
+        }
+
+        plugin.afkDetector.resetAFK(uuid)
+
+        activeSessions[uuid]?.apply {
+            sessionStartMillis = System.currentTimeMillis()
+            accumulatedSessionSeconds = 0L
+        }
+    }
+
+
     suspend fun endSession(uuid: UUID) {
         val session = activeSessions.remove(uuid) ?: return
         val nowMillis = System.currentTimeMillis()
@@ -125,58 +140,58 @@ class PlaytimeManager() {
         }
     }
 
-    suspend fun loadLeaderboard(limit: Int, leaderboardType: LeaderboardType): List<Pair<UUID, Long>> = newSuspendedTransaction {
-        val nowMillis = System.currentTimeMillis()
+    suspend fun loadLeaderboard(limit: Int, leaderboardType: LeaderboardType): List<Pair<UUID, Long>> =
+        newSuspendedTransaction {
+            val nowMillis = System.currentTimeMillis()
 
-        when (leaderboardType) {
-            LeaderboardType.PLAYTIME -> {
-                val topStored = PlayTime.selectAll()
-                    .orderBy(PlayTime.totalPlaytimeSeconds, SortOrder.DESC)
-                    .limit(limit * 2)
-                    .associate { it[PlayTime.uuid] to it[PlayTime.totalPlaytimeSeconds] }
+            when (leaderboardType) {
+                LeaderboardType.PLAYTIME -> {
+                    val topStored = PlayTime.selectAll()
+                        .orderBy(PlayTime.totalPlaytimeSeconds, SortOrder.DESC)
+                        .limit(limit * 2)
+                        .associate { it[PlayTime.uuid] to it[PlayTime.totalPlaytimeSeconds] }
 
-                val activeUUIDs = activeSessions.keys
-                val combinedUUIDs = (topStored.keys + activeUUIDs).toSet()
+                    val activeUUIDs = activeSessions.keys
+                    val combinedUUIDs = (topStored.keys + activeUUIDs).toSet()
 
-                val playtimeList = combinedUUIDs.map { uuid ->
-                    val storedSeconds = topStored[uuid] ?: 0L
+                    val playtimeList = combinedUUIDs.map { uuid ->
+                        val storedSeconds = topStored[uuid] ?: 0L
 
-                    val session = activeSessions[uuid]
-                    val sessionSeconds = if (session != null) {
-                        val elapsedSessionSeconds = ((nowMillis - session.sessionStartMillis) / 1000)
-                        session.accumulatedSessionSeconds + elapsedSessionSeconds
-                    } else {
-                        0L
+                        val session = activeSessions[uuid]
+                        val sessionSeconds = if (session != null) {
+                            val elapsedSessionSeconds = ((nowMillis - session.sessionStartMillis) / 1000)
+                            session.accumulatedSessionSeconds + elapsedSessionSeconds
+                        } else {
+                            0L
+                        }
+
+                        val afkSeconds = plugin.afkDetector.getTotalAfkTime(uuid)
+                        val totalSeconds = (storedSeconds + sessionSeconds - afkSeconds).coerceAtLeast(0L)
+                        uuid to totalSeconds
                     }
 
-                    val afkSeconds = plugin.afkDetector.getTotalAfkTime(uuid)
-                    val totalSeconds = (storedSeconds + sessionSeconds - afkSeconds).coerceAtLeast(0L)
-                    uuid to totalSeconds
+                    playtimeList.sortedByDescending { it.second }.take(limit)
                 }
 
-                playtimeList.sortedByDescending { it.second }.take(limit)
-            }
+                LeaderboardType.CURRENT_LOGIN_STREAK -> {
+                    PlayTime
+                        .slice(PlayTime.uuid, PlayTime.currentStreak)
+                        .selectAll()
+                        .orderBy(PlayTime.currentStreak, SortOrder.DESC)
+                        .limit(limit)
+                        .map { it[PlayTime.uuid] to it[PlayTime.currentStreak].toLong() }
+                }
 
-            LeaderboardType.CURRENT_LOGIN_STREAK -> {
-                PlayTime
-                    .slice(PlayTime.uuid, PlayTime.currentStreak)
-                    .selectAll()
-                    .orderBy(PlayTime.currentStreak, SortOrder.DESC)
-                    .limit(limit)
-                    .map { it[PlayTime.uuid] to it[PlayTime.currentStreak].toLong() }
-            }
-
-            LeaderboardType.MAX_LOGIN_STREAK -> {
-                PlayTime
-                    .slice(PlayTime.uuid, PlayTime.longestStreak)
-                    .selectAll()
-                    .orderBy(PlayTime.longestStreak, SortOrder.DESC)
-                    .limit(limit)
-                    .map { it[PlayTime.uuid] to it[PlayTime.longestStreak].toLong() }
+                LeaderboardType.MAX_LOGIN_STREAK -> {
+                    PlayTime
+                        .slice(PlayTime.uuid, PlayTime.longestStreak)
+                        .selectAll()
+                        .orderBy(PlayTime.longestStreak, SortOrder.DESC)
+                        .limit(limit)
+                        .map { it[PlayTime.uuid] to it[PlayTime.longestStreak].toLong() }
+                }
             }
         }
-    }
-
 
 
     private suspend fun loadTotalPlaytime(uuid: UUID): Long? = newSuspendedTransaction {
