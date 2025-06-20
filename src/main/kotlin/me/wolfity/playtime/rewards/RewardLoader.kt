@@ -10,7 +10,6 @@ class RewardLoader() {
         val section = plugin.config.getConfigurationSection("play-time-rewards")
         val rewardsMap = mutableMapOf<Int, String>()
         section?.getKeys(false)?.forEach { key ->
-            println("KEYYYY $key")
             val seconds = key.toIntOrNull()
             val command = section.getString(key)
             if (seconds != null && command != null) {
