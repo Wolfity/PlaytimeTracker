@@ -17,6 +17,11 @@ login-streak-body:
   - "<yellow>Current Streak: <gold>{currentStreak}"
   - "<yellow>Max Streak: <gold>{maxStreak}"
 
+reward-received-message: "<yellow>You received a playtime reward for playing <gold><bold>{playtime}!"
+
+play-time-rewards:
+  60: eco give {player} 60
+  120: eco give {player} 1000
 
 
 # This is the amount of minutes of inactivity

@@ -42,7 +42,7 @@ object DatabaseManager {
         Database.connect(dataSource)
 
         transaction {
-            SchemaUtils.createMissingTablesAndColumns(PlayerRegistry, PlayTime)
+            SchemaUtils.createMissingTablesAndColumns(PlayerRegistry, PlayTime, PlaytimeRewardLog)
         }
     }
 }

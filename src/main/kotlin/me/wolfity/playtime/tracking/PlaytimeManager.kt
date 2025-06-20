@@ -5,6 +5,7 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.toKotlinLocalDate
 import me.wolfity.playtime.commands.LeaderboardType
 import me.wolfity.playtime.db.PlayTime
+import me.wolfity.playtime.db.PlaytimeRewardLog
 import me.wolfity.playtime.plugin
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.selectAll
@@ -12,6 +13,7 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import java.time.LocalDate
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
 class PlaytimeManager() {
 
@@ -27,6 +29,8 @@ class PlaytimeManager() {
             it[totalPlaytimeSeconds] = 0L
             it[lastUpdate] = System.currentTimeMillis() / 1000
         }
+
+        PlaytimeRewardLog.deleteWhere { PlaytimeRewardLog.uuid eq uuid }
 
         plugin.afkDetector.resetAFK(uuid)
 

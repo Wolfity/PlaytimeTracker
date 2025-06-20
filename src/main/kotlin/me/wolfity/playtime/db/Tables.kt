@@ -21,3 +21,11 @@ object PlayTime : Table("play_time") {
 
     override val primaryKey: PrimaryKey = PrimaryKey(uuid)
 }
+
+object PlaytimeRewardLog : Table("playtime_reward_log") {
+    val uuid = uuid("uuid").references(PlayerRegistry.uuid)
+    val rewardTimeSeconds = integer("reward_time_seconds")
+    val receivedAt = long("received_at")
+
+    override val primaryKey = PrimaryKey(uuid, rewardTimeSeconds)
+}
