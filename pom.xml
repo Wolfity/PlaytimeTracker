@@ -6,7 +6,7 @@
 
     <groupId>me.wolfity.playtime</groupId>
     <artifactId>PlaytimeTracker</artifactId>
-    <version>1.4.0</version>
+    <version>1.4.1</version>
     <packaging>jar</packaging>
 
     <name>PlaytimeTracker</name>
